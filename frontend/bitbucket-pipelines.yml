@@ -1,0 +1,61 @@
+image: node:latest
+
+definitions:
+  caches:
+    cypress: $HOME/.cache/Cypress
+  steps:
+    - step: &lint
+        name: "Run lint"
+        caches:
+          - node
+        script:
+          - npm install
+          - npm run lint
+    - step: &test
+        name: "Run test"
+        caches:
+          - node
+          - cypress
+        image: cypress/base:10
+        script:
+          - npm install
+          - npm run serve & npx wait-on http://localhost:8080
+          - npm run test
+
+deploy: &deploy
+  name: "Deploy to S3"
+  caches:
+    - node
+  script:
+    - apt-get update && apt-get install -y python-dev
+    - curl -O https://bootstrap.pypa.io/pip/2.7/get-pip.py
+    - python get-pip.py
+    - pip install awscli
+    - npm ci
+    - npm run build
+    - echo $S3_URL
+    - aws s3 sync dist $S3_URL --acl public-read --delete
+
+pipelines:
+  default:
+    - parallel:
+      - step: *lint
+      - step: *test
+    
+  branches:
+    master:
+      - parallel:
+        - step: *lint
+        - step: *test
+      - step:
+          deployment: test
+          <<: *deploy
+
+  tags:
+    release-*:
+      - parallel:
+        - step: *lint
+        - step: *test
+      - step:
+          deployment: production
+          <<: *deploy

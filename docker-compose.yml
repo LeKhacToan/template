@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:11
+    ports:
+      - "54322:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_db
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: 
+      - ./backend/.env
+    volumes:
+      - ./backend:/app/api
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    env_file:
+      - ./frontend/.env
+    volumes:
+      - ./frontend:/app/web
+      - /app/web/node_modules
+    ports: 
+      - "8080:8080"

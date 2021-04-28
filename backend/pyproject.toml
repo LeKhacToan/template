@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "blog"
+version = "0.1.0"
+description = ""
+authors = ["codenet_toanlk <toanlk@codenet.jp>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.63.0"
+psycopg2-binary = "^2.8.6"
+peewee = "^3.14.4"
+uvicorn = "^0.13.4"
+python-dotenv = "^0.17.0"
+alembic = "^1.5.8"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.3"
+flake8 = "^3.9.1"
+pytest-cov = "^2.11.1"
+autopep8 = "^1.5.6"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
